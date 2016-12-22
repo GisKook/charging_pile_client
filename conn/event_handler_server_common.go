@@ -5,7 +5,7 @@ import (
 	"log"
 )
 
-func event_handler_server_msg_comon(conn *Conn) {
+func event_handler_server_msg_common(conn *Conn) {
 	for conn.ReadMore {
 		cmdid, pkglen := protocol.CheckProtocol(conn.RecieveBuffer)
 		log.Printf("protocol id %d\n", cmdid)
@@ -49,7 +49,8 @@ func event_handler_server_msg_comon(conn *Conn) {
 			event_handler_server_msg_stop_charging(conn, p)
 			conn.ReadMore = true
 		case protocol.PROTOCOL_REP_NOTIFY_SET_PRICE:
-			event_handler_server_msg_notify_set_price(conn)
+			p := protocol.ParseServerNotifyPrice(pkgbyte)
+			event_handler_server_msg_notify_set_price(conn, p)
 			conn.ReadMore = true
 
 		case protocol.PROTOCOL_ILLEGAL:

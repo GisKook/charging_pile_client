@@ -6,6 +6,6 @@ import (
 )
 
 func event_handler_server_msg_charging_prepare(c *Conn, p pkg.Packet) {
-	log.Println("event_handler_server_msg_charging")
+	log.Println("event_handler_server_msg_charging_prepare")
 	c.Send(p.Serialize())
 }

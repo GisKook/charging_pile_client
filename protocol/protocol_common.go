@@ -48,6 +48,8 @@ const (
 	PROTOCOL_REQ_CHARGING uint16 = 0x800a
 	PROTOCOL_REP_CHARGING uint16 = 0x000a
 
+	PROTOCOL_REP_UPLOAD_METER uint16 = 0x000c
+
 	PROTOCOL_REQ_STOP_CHARGING uint16 = 0x800e
 	PROTOCOL_REP_STOP_CHARGING uint16 = 0x000e
 
@@ -118,6 +120,7 @@ func CalcCRC(data []byte, size uint16) uint16 {
 }
 
 func CheckProtocol(buffer *bytes.Buffer) (uint16, uint16) {
+	log.Println("check protocol")
 	bufferlen := buffer.Len()
 	if bufferlen == 0 {
 		return PROTOCOL_ILLEGAL, 0

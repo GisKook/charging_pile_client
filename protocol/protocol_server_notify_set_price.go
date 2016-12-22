@@ -7,13 +7,15 @@ import (
 
 type ServerNotifyPricePacket struct {
 	Tid    uint64
+	Serial uint32
 	Result uint8
 }
 
 func (p *ServerNotifyPricePacket) Serialize() []byte {
 	var writer bytes.Buffer
 	WriteHeader(&writer, 0,
-		PROTOCOL_REP_CHARGING, p.Tid)
+		PROTOCOL_REP_NOTIFY_SET_PRICE, p.Tid)
+	base.WriteDWord(&writer, p.Serial)
 	writer.WriteByte(p.Result)
 	base.WriteLength(&writer)
 
@@ -24,10 +26,12 @@ func (p *ServerNotifyPricePacket) Serialize() []byte {
 }
 
 func ParseServerNotifyPrice(buffer []byte) *ServerNotifyPricePacket {
-	_, _, _, tid := ParseHeader(buffer)
+	reader, _, _, tid := ParseHeader(buffer)
+	serial := base.ReadDWord(reader)
 
 	return &ServerNotifyPricePacket{
 		Tid:    tid,
+		Serial: serial,
 		Result: 0,
 	}
 

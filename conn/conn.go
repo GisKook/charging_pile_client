@@ -15,19 +15,19 @@ var ConnSuccess uint8 = 0
 var ConnUnauth uint8 = 1
 
 type Conn struct {
-	conn          *net.TCPConn
-	config        *conf.Configuration
-	RecieveBuffer *bytes.Buffer
-	sendChan      chan pkg.Packet
-	ticker        *time.Ticker
-	readflag      int64
-	writeflag     int64
-	closeChan     chan bool
-	index         uint32
-	ID            uint64
-	Charging_Pile *base.Charging_Pile
-	ReadMore      bool
-	Status        uint8
+	conn                 *net.TCPConn
+	config               *conf.Configuration
+	RecieveBuffer        *bytes.Buffer
+	sendChan             chan pkg.Packet
+	ticker               *time.Ticker
+	readflag             int64
+	writeflag            int64
+	closeChan            chan bool
+	ID                   uint64
+	Charging_Pile        *base.Charging_Pile
+	Charging_Pile_Status chan uint8
+	ReadMore             bool
+	Status               uint8
 }
 
 func NewConn(tid uint64, config *conf.Configuration) *Conn {
@@ -38,18 +38,25 @@ func NewConn(tid uint64, config *conf.Configuration) *Conn {
 		writeflag:     time.Now().Unix(),
 		ticker:        time.NewTicker(time.Duration(config.Client.HeartInterval) * time.Second),
 		closeChan:     make(chan bool),
-		index:         0,
 		ReadMore:      true,
+		ID:            tid,
 		Charging_Pile: &base.Charging_Pile{
-			ID:     tid,
-			Status: 0,
+			ID:               tid,
+			Status:           base.IDLE,
+			ChargingDuration: 0,
+			ChargingCapacity: 0,
+			MeterReading:     0,
+			RealtimeA:        0,
+			RealtimeV:        0,
 		},
-		Status: ConnUnauth,
+		Charging_Pile_Status: make(chan uint8),
+		Status:               ConnUnauth,
 	}
 }
 
 func (c *Conn) Close() {
 	c.closeChan <- true
+	close(c.Charging_Pile_Status)
 	c.ticker.Stop()
 	c.RecieveBuffer.Reset()
 	c.conn.Close()
@@ -118,7 +125,8 @@ func (c *Conn) handle() {
 		c.RecieveBuffer.Write(buffer[0:buf_len])
 		if buf_len > 0 {
 			log.Printf("<IN> %x\n", buffer[0:buf_len])
-			event_handler_server_msg_comon(c)
+			c.ReadMore = true
+			event_handler_server_msg_common(c)
 		}
 	}
 }
@@ -132,6 +140,7 @@ func (c *Conn) UpdateWriteflag() {
 }
 
 func (c *Conn) Send(data []byte) {
+	log.Printf("<OUT> %x\n", data)
 	c.conn.Write(data)
 }
 
@@ -142,15 +151,63 @@ func (c *Conn) heart() {
 
 	for {
 		select {
-		case <-c.ticker.C:
-			heart := &protocol.ServerHeartPacket{
-				Tid:    c.Charging_Pile.ID,
-				Status: c.Charging_Pile.Status,
+		case status := <-c.Charging_Pile_Status:
+			c.Charging_Pile.Status = status
+			if status == base.FULL {
+				c.ProccessChargingPileStopChargingStatus()
+				c.Charging_Pile.Status = base.IDLE
 			}
-			c.conn.Write(heart.Serialize())
+		case <-c.ticker.C:
+			if c.Charging_Pile.Status == base.IDLE {
+				c.ProccessChargingPileIDLEStatus()
+			} else if c.Charging_Pile.Status == base.CHARGING {
+				c.ProccessChargingPileChargingStatus()
+			}
+
 		case <-c.closeChan:
 			log.Println("recv close")
 			return
 		}
 	}
+}
+
+func (c *Conn) ProccessChargingPileIDLEStatus() {
+	heart := &protocol.ServerHeartPacket{
+		Tid:    c.Charging_Pile.ID,
+		Status: c.Charging_Pile.Status,
+	}
+	c.Send(heart.Serialize())
+}
+
+func (c *Conn) ProccessChargingPileChargingStatus() {
+	upload_meter := &protocol.ServerUploadMeterPacket{
+		Tid:              c.ID,
+		UserID:           c.Charging_Pile.UserID,
+		TransactionID:    c.Charging_Pile.TransactionID,
+		ChargingDuration: c.Charging_Pile.ChargingDuration + uint32(c.config.Client.HeartInterval),
+		ChargingCapacity: c.Charging_Pile.ChargingCapacity + 5,
+		MeterReading:     c.Charging_Pile.MeterReading + 5,
+		RealtimeA:        uint32(time.Now().Unix()) % 200,
+		RealtimeV:        uint32(time.Now().Unix()) % 380,
+	}
+	c.Send(upload_meter.Serialize())
+}
+
+func (c *Conn) ProccessChargingPileStopChargingStatus() {
+	stop_charging := &protocol.ServerStopChargingPacket{
+		Tid:              c.ID,
+		Serial:           0,
+		UserID:           c.Charging_Pile.UserID,
+		TransactionID:    c.Charging_Pile.TransactionID,
+		StopReason:       base.FULL,
+		MeterReading:     c.Charging_Pile.MeterReading,
+		ChargingDuration: c.Charging_Pile.ChargingDuration,
+		ChargingCapacity: c.Charging_Pile.ChargingCapacity,
+		ChargingPrice:    c.Charging_Pile.ChargingPrice,
+	}
+	c.Send(stop_charging.Serialize())
+	c.Charging_Pile.MeterReading = 0
+	c.Charging_Pile.ChargingDuration = 0
+	c.Charging_Pile.ChargingCapacity = 0
+	c.Charging_Pile.ChargingPrice = 0
 }

@@ -9,6 +9,14 @@ type Price struct {
 	Service_price   uint16
 }
 
+const (
+	IDLE         uint8 = 0
+	CHARGING     uint8 = 1
+	TOBECHARGING uint8 = 2
+	FULL         uint8 = 3
+	MAINTAINCE   uint8 = 4
+)
+
 type Charging_Pile struct {
 	ID              uint64
 	BoxVersion      byte
@@ -22,4 +30,13 @@ type Charging_Pile struct {
 	Wifi       string
 	Passwd     string
 	Interface  uint8
+
+	UserID           string
+	TransactionID    string
+	ChargingDuration uint32
+	ChargingCapacity uint32
+	ChargingPrice    uint32
+	MeterReading     uint32
+	RealtimeA        uint32
+	RealtimeV        uint32
 }

@@ -1,12 +1,13 @@
 package conn
 
 import (
-	//"github.com/giskook/charging_pile_client/pkg"
+	"github.com/giskook/charging_pile_client/pkg"
 	"log"
 )
 
-func event_handler_server_msg_notify_set_price(c *Conn) {
+func event_handler_server_msg_notify_set_price(c *Conn, p pkg.Packet) {
 	log.Println("event_handler_server_msg_notify_set_price")
-	//	packet := p.Packet.(*protocol.ServerNotifySetPricePacket)
-	//	c.Prices = p.Prices
+	//packet := p.Packet.(*protocol.ServerNotifySetPricePacket)
+	//c.Prices = p.Prices
+	c.Send(p.Serialize())
 }

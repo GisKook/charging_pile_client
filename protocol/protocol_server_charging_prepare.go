@@ -3,7 +3,7 @@ package protocol
 import (
 	"bytes"
 	"github.com/giskook/charging_pile_client/base"
-	"time"
+	//"time"
 )
 
 const (
@@ -18,9 +18,11 @@ type ServerChargingPreparePacket struct {
 
 func (p *ServerChargingPreparePacket) Serialize() []byte {
 	var writer bytes.Buffer
-	WriteHeader(&writer, PROTOCOL_REP_CHARGING_PREPARE_LEN, PROTOCOL_REP_CHARGING, p.Tid)
+	WriteHeader(&writer, PROTOCOL_REP_CHARGING_PREPARE_LEN, PROTOCOL_REP_CHARGING_PREPARE, p.Tid)
 	base.WriteDWord(&writer, p.Serial)
-	writer.WriteByte(byte(time.Now().Unix() % 4))
+	//writer.WriteByte(byte(time.Now().Unix() % 4))
+	writer.WriteByte(0)
+	base.WriteWord(&writer, p.PinCode)
 
 	base.WriteWord(&writer, CalcCRC(writer.Bytes(), uint16(writer.Len())))
 	writer.WriteByte(PROTOCOL_END_FLAG)

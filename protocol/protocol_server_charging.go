@@ -23,7 +23,10 @@ func (p *ServerChargingPacket) Serialize() []byte {
 	writer.WriteByte(byte(len(p.UserID)))
 	base.WriteString(&writer, p.UserID)
 	base.WriteBcdString(&writer, p.TransactionID)
-	writer.WriteByte(byte(time.Now().Unix() % 4))
+	//writer.WriteByte(byte(time.Now().Unix() % 4))
+	writer.WriteByte(0)
+	_time := time.Now().Format("20060102150405")
+	base.WriteBcdString(&writer, _time)
 	base.WriteLength(&writer)
 
 	base.WriteWord(&writer, CalcCRC(writer.Bytes(), uint16(writer.Len())))
