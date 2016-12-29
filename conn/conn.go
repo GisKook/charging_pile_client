@@ -191,6 +191,9 @@ func (c *Conn) ProccessChargingPileChargingStatus() {
 		RealtimeV:        uint32(time.Now().Unix()) % 380,
 	}
 	c.Send(upload_meter.Serialize())
+	c.Charging_Pile.ChargingDuration += uint32(c.config.Client.HeartInterval)
+	c.Charging_Pile.ChargingCapacity += 5
+	c.Charging_Pile.MeterReading += 5
 }
 
 func (c *Conn) ProccessChargingPileStopChargingStatus() {
