@@ -12,7 +12,7 @@ type ServerPricePacket struct {
 func (p *ServerPricePacket) Serialize() []byte {
 	var writer bytes.Buffer
 	WriteHeader(&writer, 0,
-		PROTOCOL_REP_PRICE, p.Tid)
+		PROTOCOL_REQ_PRICE, p.Tid)
 	base.WriteLength(&writer)
 
 	base.WriteWord(&writer, CalcCRC(writer.Bytes(), uint16(writer.Len())))

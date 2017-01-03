@@ -89,6 +89,12 @@ func (c *Conn) Start() {
 		log.Println(err.Error())
 	}
 
+	//log.Println("send req price")
+	//req_price := &protocol.ServerPricePacket{
+	//	Tid: c.Charging_Pile.ID,
+	//}
+	//c.Send(req_price.Serialize())
+
 	//	log.Println("send setting")
 	//	setting := &protocol.ServerSettingPacket{
 	//		Tid: c.Charging_Pile.ID,
