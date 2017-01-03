@@ -31,9 +31,6 @@ func (p *ServerStopChargingPacket) Serialize() []byte {
 	base.WriteDWord(&writer, p.ChargingDuration)
 	base.WriteDWord(&writer, p.ChargingCapacity)
 	base.WriteDWord(&writer, p.ChargingPrice)
-	_time := time.Now().Format("20060102150405")
-	base.WriteBcdString(&writer, _time)
-
 	writer.WriteByte(1)
 
 	start_time_s := time.Now().Unix() - int64(p.ChargingDuration)
@@ -45,6 +42,9 @@ func (p *ServerStopChargingPacket) Serialize() []byte {
 	base.WriteBcdString(&writer, end_time)
 	base.WriteDWord(&writer, p.ChargingPrice)
 	base.WriteDWord(&writer, p.ChargingCapacity)
+
+	_time := time.Now().Format("20060102150405")
+	base.WriteBcdString(&writer, _time)
 
 	base.WriteLength(&writer)
 
