@@ -19,10 +19,10 @@ func event_handler_server_msg_login(c *Conn, p pkg.Packet) {
 		//		}
 		//		c.Send(req_price.Serialize())
 
-		log.Println("send max current")
-		max_current := &protocol.ServerMaxCurrentPacket{
-			Tid: c.Charging_Pile.ID,
-		}
-		c.Send(max_current.Serialize())
+		//		log.Println("send max current")
+		//		max_current := &protocol.ServerMaxCurrentPacket{
+		//			Tid: c.Charging_Pile.ID,
+		//		}
+		//		c.Send(max_current.Serialize())
 	}
 }

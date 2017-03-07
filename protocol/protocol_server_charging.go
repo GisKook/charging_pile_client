@@ -8,8 +8,7 @@ import (
 
 type ServerChargingPacket struct {
 	Tid           uint64
-	Serial        uint32
-	PinCode       uint16
+	PinCode       string
 	UserID        string
 	TransactionID string
 	Amount        uint32
@@ -19,13 +18,8 @@ func (p *ServerChargingPacket) Serialize() []byte {
 	var writer bytes.Buffer
 	WriteHeader(&writer, 0,
 		PROTOCOL_REP_CHARGING, p.Tid)
-	base.WriteDWord(&writer, p.Serial)
-	writer.WriteByte(byte(len(p.UserID)))
-	base.WriteString(&writer, p.UserID)
-	base.WriteBcdString(&writer, p.TransactionID)
-	//writer.WriteByte(byte(time.Now().Unix() % 4))
 	writer.WriteByte(0)
-	_time := time.Now().Format("20060102150405")
+	_time := time.Now().Format("060102150405")
 	base.WriteBcdString(&writer, _time)
 	base.WriteLength(&writer)
 
@@ -37,16 +31,13 @@ func (p *ServerChargingPacket) Serialize() []byte {
 
 func ParseServerCharging(buffer []byte) *ServerChargingPacket {
 	reader, _, _, tid := ParseHeader(buffer)
-	serial := base.ReadDWord(reader)
-	pincode := base.ReadWord(reader)
-	userid_len, _ := reader.ReadByte()
-	userid := base.ReadString(reader, userid_len)
+	userid := base.ReadString(reader, PROTOCOL_USERID_LEN)
+	pincode := base.ReadString(reader, PROTOCOL_PINCODE_LEN)
 	transaction_id := base.ReadBcdString(reader, PROTOCOL_TRANSACTION_BCD_LEN)
 	amount := base.ReadDWord(reader)
 
 	return &ServerChargingPacket{
 		Tid:           tid,
-		Serial:        serial,
 		PinCode:       pincode,
 		UserID:        userid,
 		TransactionID: transaction_id,

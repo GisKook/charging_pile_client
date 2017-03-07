@@ -10,11 +10,13 @@ type Price struct {
 }
 
 const (
-	IDLE         uint8 = 0
-	CHARGING     uint8 = 1
-	TOBECHARGING uint8 = 2
-	FULL         uint8 = 3
-	MAINTAINCE   uint8 = 4
+	IDLE               uint8 = 0
+	CHARGING           uint8 = 1
+	TOBECHARGING       uint8 = 2
+	FULL               uint8 = 3
+	MAINTAINCE         uint8 = 4
+	TOBE_STOP_CHARGING uint8 = 5
+	CHARGING_STOPPED   uint8 = 6
 )
 
 type Charging_Pile struct {
@@ -31,12 +33,22 @@ type Charging_Pile struct {
 	Passwd     string
 	Interface  uint8
 
-	UserID           string
-	TransactionID    string
-	ChargingDuration uint32
-	ChargingCapacity uint32
-	ChargingPrice    uint32
-	MeterReading     uint32
-	RealtimeA        uint32
-	RealtimeV        uint32
+	UserID            string
+	TransactionID     string
+	StartMeterReading uint32
+	ChargingCapacity  uint32
+	ChargingPrice     uint32
+	MeterReading      uint32
+	Power             uint16
+	Va                uint16
+	Vb                uint16
+	Vc                uint16
+	Ia                uint16
+	Ib                uint16
+	Ic                uint16
+	RealtimeA         uint32
+	RealtimeV         uint32
+
+	PinCode string
+	Amount  uint32
 }

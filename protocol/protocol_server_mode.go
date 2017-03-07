@@ -13,7 +13,7 @@ type ServerModePacket struct {
 func (p *ServerModePacket) Serialize() []byte {
 	var writer bytes.Buffer
 	WriteHeader(&writer, 0,
-		PROTOCOL_REQ_MODE, p.Tid)
+		PROTOCOL_REQ_THREE_PHASE_MODE, p.Tid)
 	base.WriteLength(&writer)
 
 	base.WriteWord(&writer, CalcCRC(writer.Bytes(), uint16(writer.Len())))

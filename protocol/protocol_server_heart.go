@@ -16,7 +16,7 @@ func (p *ServerHeartPacket) Serialize() []byte {
 	WriteHeader(&writer, 0,
 		PROTOCOL_REQ_HEART, p.Tid)
 	writer.WriteByte(p.Status)
-	_time := time.Now().Format("20060102150405")
+	_time := time.Now().Format("060102150405")
 	base.WriteBcdString(&writer, _time)
 
 	base.WriteLength(&writer)

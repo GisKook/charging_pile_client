@@ -3,36 +3,35 @@ package protocol
 import (
 	"bytes"
 	"github.com/giskook/charging_pile_client/base"
-	"time"
 )
 
 type ServerUploadMeterPacket struct {
-	Tid              uint64
-	UserID           string
-	TransactionID    string
-	MeterReading     uint32
-	ChargingDuration uint32
-	ChargingCapacity uint32
-	ChargingPrice    uint32
-	RealtimeA        uint32
-	RealtimeV        uint32
+	Tid          uint64
+	MeterReading uint32
+	Power        uint16
+	Status       uint8
+	Va           uint16
+	Vb           uint16
+	Vc           uint16
+	Ia           uint16
+	Ib           uint16
+	Ic           uint16
 }
 
 func (p *ServerUploadMeterPacket) Serialize() []byte {
 	var writer bytes.Buffer
 	WriteHeader(&writer, 0,
-		PROTOCOL_REP_UPLOAD_METER, p.Tid)
-	writer.WriteByte(byte(len(p.UserID)))
-	base.WriteString(&writer, p.UserID)
-	base.WriteBcdString(&writer, p.TransactionID)
-	base.WriteDWord(&writer, p.ChargingDuration)
-	base.WriteDWord(&writer, p.ChargingCapacity)
-	base.WriteDWord(&writer, p.ChargingPrice)
+		PROTOCOL_REP_CHARGING_DATA_UPLOAD, p.Tid)
 	base.WriteDWord(&writer, p.MeterReading)
-	base.WriteDWord(&writer, p.RealtimeA)
-	base.WriteDWord(&writer, p.RealtimeV)
-	_time := time.Now().Format("20060102150405")
-	base.WriteBcdString(&writer, _time)
+	base.WriteWord(&writer, p.Power)
+	writer.WriteByte(p.Status)
+	base.WriteWord(&writer, p.Va)
+	base.WriteWord(&writer, p.Vb)
+	base.WriteWord(&writer, p.Vc)
+	base.WriteWord(&writer, p.Ia)
+	base.WriteWord(&writer, p.Ib)
+	base.WriteWord(&writer, p.Ic)
+	base.WriteBcdTime(&writer)
 
 	base.WriteLength(&writer)
 

@@ -28,17 +28,13 @@ func event_handler_server_msg_common(conn *Conn) {
 			p := protocol.ParseServerPrice(pkgbyte)
 			event_handler_server_msg_price(conn, p)
 			conn.ReadMore = true
-		case protocol.PROTOCOL_REP_MODE:
+		case protocol.PROTOCOL_REP_THREE_PHASE_MODE:
 			p := protocol.ParseServerMode(pkgbyte)
 			event_handler_server_msg_mode(conn, p)
 			conn.ReadMore = true
-		case protocol.PROTOCOL_REP_MAX_CURRENT:
-			p := protocol.ParseServerMaxCurrent(pkgbyte)
-			event_handler_server_msg_max_current(conn, p)
-			conn.ReadMore = true
-		case protocol.PROTOCOL_REQ_CHARGING_PREPARE:
-			p := protocol.ParseServerChargingPrepare(pkgbyte)
-			event_handler_server_msg_charging_prepare(conn, p)
+		case protocol.PROTOCOL_REQ_GUN_STATUS:
+			p := protocol.ParseGetGunStatus(pkgbyte)
+			event_handler_server_msg_get_gun_status(conn, p)
 			conn.ReadMore = true
 		case protocol.PROTOCOL_REQ_CHARGING:
 			p := protocol.ParseServerCharging(pkgbyte)
@@ -52,6 +48,9 @@ func event_handler_server_msg_common(conn *Conn) {
 			p := protocol.ParseServerNotifyPrice(pkgbyte)
 			event_handler_server_msg_notify_set_price(conn, p)
 			conn.ReadMore = true
+		case protocol.PROTOCOL_REP_CHARGING_COST:
+			p := protocol.ParseChargingCost(pkgbyte)
+			event_handler_server_msg_rep_charging_cost(conn, p)
 
 		case protocol.PROTOCOL_ILLEGAL:
 			conn.ReadMore = false

@@ -7,17 +7,31 @@ import (
 )
 
 type LoginPacket struct {
-	Tid uint64
+	Tid               uint64
+	ProtocolVersion   uint8
+	HardwareVersion   uint8
+	PinCode           string
+	Status            uint8
+	UserID            string
+	TransactionID     string
+	StartTime         uint32
+	StartMeterReading uint32
 }
 
 func (p *LoginPacket) Serialize() []byte {
 	var writer bytes.Buffer
 	WriteHeader(&writer, 0,
 		PROTOCOL_REQ_LOGIN, p.Tid)
-	writer.WriteByte(1)
-	writer.WriteByte(1)
-	writer.WriteByte(0)
-	_time := time.Now().Format("20060102150405")
+	writer.WriteByte(p.ProtocolVersion)
+	writer.WriteByte(p.HardwareVersion)
+	base.WriteString(&writer, p.PinCode)
+	writer.WriteByte(p.Status)
+	base.WriteString(&writer, p.UserID)
+	base.WriteString(&writer, p.TransactionID)
+	_cur_t := time.Now()
+	base.WriteDWord(&writer, uint32(_cur_t.Unix()))
+	base.WriteDWord(&writer, p.StartMeterReading)
+	_time := _cur_t.Format("20060102150405")
 	base.WriteBcdString(&writer, _time)
 	base.WriteLength(&writer)
 

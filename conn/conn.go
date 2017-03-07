@@ -43,7 +43,6 @@ func NewConn(tid uint64, config *conf.Configuration) *Conn {
 		Charging_Pile: &base.Charging_Pile{
 			ID:               tid,
 			Status:           base.IDLE,
-			ChargingDuration: 0,
 			ChargingCapacity: 0,
 			MeterReading:     0,
 			RealtimeA:        0,
@@ -162,6 +161,12 @@ func (c *Conn) heart() {
 			if status == base.FULL {
 				c.ProccessChargingPileStopChargingStatus()
 				c.Charging_Pile.Status = base.IDLE
+			} else if status == base.TOBECHARGING {
+				c.SendChargingStarted()
+				c.Charging_Pile.Status = base.CHARGING
+			} else if status == base.TOBE_STOP_CHARGING {
+				c.SendChargingStopped()
+				c.Charging_Pile.Status = base.IDLE
 			}
 		case <-c.ticker.C:
 			if c.Charging_Pile.Status == base.IDLE {
@@ -187,36 +192,25 @@ func (c *Conn) ProccessChargingPileIDLEStatus() {
 
 func (c *Conn) ProccessChargingPileChargingStatus() {
 	upload_meter := &protocol.ServerUploadMeterPacket{
-		Tid:              c.ID,
-		UserID:           c.Charging_Pile.UserID,
-		TransactionID:    c.Charging_Pile.TransactionID,
-		ChargingDuration: c.Charging_Pile.ChargingDuration + uint32(c.config.Client.HeartInterval),
-		ChargingCapacity: c.Charging_Pile.ChargingCapacity + 5,
-		MeterReading:     c.Charging_Pile.MeterReading + 5,
-		RealtimeA:        uint32(time.Now().Unix()) % 200,
-		RealtimeV:        uint32(time.Now().Unix()) % 380,
+		Tid:          c.ID,
+		MeterReading: c.Charging_Pile.MeterReading + 5,
+		Power:        200,
+		Status:       0,
+		Va:           uint16(time.Now().Unix()) % 380,
+		Vb:           uint16(time.Now().Unix()) % 380,
+		Vc:           uint16(time.Now().Unix()) % 380,
+		Ia:           uint16(time.Now().Unix()) % 20,
+		Ib:           uint16(time.Now().Unix()) % 20,
+		Ic:           uint16(time.Now().Unix()) % 20,
 	}
 	c.Send(upload_meter.Serialize())
-	c.Charging_Pile.ChargingDuration += uint32(c.config.Client.HeartInterval)
-	c.Charging_Pile.ChargingCapacity += 5
 	c.Charging_Pile.MeterReading += 5
 }
 
 func (c *Conn) ProccessChargingPileStopChargingStatus() {
 	stop_charging := &protocol.ServerStopChargingPacket{
-		Tid:              c.ID,
-		Serial:           0,
-		UserID:           c.Charging_Pile.UserID,
-		TransactionID:    c.Charging_Pile.TransactionID,
-		StopReason:       base.FULL,
-		MeterReading:     c.Charging_Pile.MeterReading,
-		ChargingDuration: c.Charging_Pile.ChargingDuration,
-		ChargingCapacity: c.Charging_Pile.ChargingCapacity,
-		ChargingPrice:    c.Charging_Pile.ChargingPrice,
+		Tid: c.ID,
 	}
 	c.Send(stop_charging.Serialize())
 	c.Charging_Pile.MeterReading = 0
-	c.Charging_Pile.ChargingDuration = 0
-	c.Charging_Pile.ChargingCapacity = 0
-	c.Charging_Pile.ChargingPrice = 0
 }

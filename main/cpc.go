@@ -18,7 +18,7 @@ func main() {
 
 	checkError(err)
 
-	conn := conn.NewConn(1000000000000084, configuration)
+	conn := conn.NewConn(1000000000000128, configuration)
 	go conn.Start()
 	// catchs system signal
 	chSig := make(chan os.Signal)
