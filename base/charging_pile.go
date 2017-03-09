@@ -49,6 +49,7 @@ type Charging_Pile struct {
 	RealtimeA         uint32
 	RealtimeV         uint32
 
+	Serial  uint32
 	PinCode string
 	Amount  uint32
 }

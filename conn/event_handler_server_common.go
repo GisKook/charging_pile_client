@@ -51,6 +51,9 @@ func event_handler_server_msg_common(conn *Conn) {
 		case protocol.PROTOCOL_REP_CHARGING_COST:
 			p := protocol.ParseChargingCost(pkgbyte)
 			event_handler_server_msg_rep_charging_cost(conn, p)
+		case protocol.PROTOCOL_REQ_PIN:
+			p := protocol.ParseServerReqPin(pkgbyte)
+			event_handler_server_msg_rep_pin(conn, p)
 
 		case protocol.PROTOCOL_ILLEGAL:
 			conn.ReadMore = false
