@@ -37,7 +37,7 @@ func event_handler_server_msg_common(conn *Conn) {
 			event_handler_server_msg_get_gun_status(conn, p)
 			conn.ReadMore = true
 		case protocol.PROTOCOL_REQ_CHARGING:
-			p := protocol.ParseServerCharging(pkgbyte)
+			p := protocol.ParseServerCharging(pkgbyte, 0)
 			event_handler_server_msg_charging(conn, p)
 			conn.ReadMore = true
 		case protocol.PROTOCOL_REQ_STOP_CHARGING:
