@@ -193,7 +193,7 @@ func (c *Conn) ProccessChargingPileIDLEStatus() {
 func (c *Conn) ProccessChargingPileChargingStatus() {
 	upload_meter := &protocol.ServerUploadMeterPacket{
 		Tid:          c.ID,
-		MeterReading: c.Charging_Pile.MeterReading + 5,
+		MeterReading: c.Charging_Pile.MeterReading + 1,
 		Power:        200,
 		Status:       0,
 		Va:           uint16(time.Now().Unix()) % 380,
@@ -204,7 +204,7 @@ func (c *Conn) ProccessChargingPileChargingStatus() {
 		Ic:           uint16(time.Now().Unix()) % 20,
 	}
 	c.Send(upload_meter.Serialize())
-	c.Charging_Pile.MeterReading += 5
+	c.Charging_Pile.MeterReading += 1
 }
 
 func (c *Conn) ProccessChargingPileStopChargingStatus() {
