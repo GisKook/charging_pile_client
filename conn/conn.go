@@ -191,6 +191,7 @@ func (c *Conn) ProccessChargingPileIDLEStatus() {
 }
 
 func (c *Conn) ProccessChargingPileChargingStatus() {
+	time.Sleep(2 * time.Second)
 	upload_meter := &protocol.ServerUploadMeterPacket{
 		Tid:          c.ID,
 		MeterReading: c.Charging_Pile.MeterReading + 1,
