@@ -20,6 +20,7 @@ func (p *ServerChargingPacket) Serialize() []byte {
 	WriteHeader(&writer, 0,
 		PROTOCOL_REP_CHARGING, p.Tid)
 	writer.WriteByte(p.Result)
+	base.WriteString(&writer, p.PinCode)
 	_time := time.Now().Format("060102150405")
 	base.WriteBcdString(&writer, _time)
 	base.WriteLength(&writer)
