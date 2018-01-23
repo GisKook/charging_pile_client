@@ -10,7 +10,7 @@ func (c *Conn) SendChargingStarted() {
 
 	charging_started := &protocol.ChargingStartedPacket{
 		Tid:               c.ID,
-		StartMeterReading: 0,
+		StartMeterReading: METER_READING_INIT,
 		UserID:            c.Charging_Pile.UserID,
 		StartTime:         uint32(time.Now().Unix()),
 		PinCode:           c.Charging_Pile.PinCode,
@@ -20,4 +20,5 @@ func (c *Conn) SendChargingStarted() {
 	log.Println("---")
 	log.Println(charging_started.StartTime)
 	c.Send(charging_started.Serialize())
+	c.Charging_Pile.MeterReading = METER_READING_INIT
 }

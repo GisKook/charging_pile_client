@@ -14,6 +14,11 @@ import (
 var ConnSuccess uint8 = 0
 var ConnUnauth uint8 = 1
 
+const (
+	METER_READING_INIT uint32 = 3000
+	METER_READING_STEP uint32 = 1
+)
+
 type Conn struct {
 	conn                 *net.TCPConn
 	config               *conf.Configuration
@@ -44,7 +49,7 @@ func NewConn(tid uint64, config *conf.Configuration) *Conn {
 			ID:               tid,
 			Status:           base.IDLE,
 			ChargingCapacity: 0,
-			MeterReading:     0,
+			MeterReading:     METER_READING_INIT,
 			RealtimeA:        0,
 			RealtimeV:        0,
 		},
@@ -194,7 +199,7 @@ func (c *Conn) ProccessChargingPileChargingStatus() {
 	time.Sleep(2 * time.Second)
 	upload_meter := &protocol.ServerUploadMeterPacket{
 		Tid:          c.ID,
-		MeterReading: c.Charging_Pile.MeterReading + 1,
+		MeterReading: c.Charging_Pile.MeterReading + METER_READING_STEP,
 		Power:        200,
 		Status:       0,
 		Va:           uint16(time.Now().Unix()) % 380,
@@ -204,8 +209,24 @@ func (c *Conn) ProccessChargingPileChargingStatus() {
 		Ib:           uint16(time.Now().Unix()) % 20,
 		Ic:           uint16(time.Now().Unix()) % 20,
 	}
+	// for test
+	if c.Charging_Pile.MeterReading >= 3005 && c.Charging_Pile.MeterReading < 3007 {
+		upload_meter = &protocol.ServerUploadMeterPacket{
+			Tid:          c.ID,
+			MeterReading: 0,
+			Power:        200,
+			Status:       0,
+			Va:           uint16(time.Now().Unix()) % 380,
+			Vb:           uint16(time.Now().Unix()) % 380,
+			Vc:           uint16(time.Now().Unix()) % 380,
+			Ia:           uint16(time.Now().Unix()) % 20,
+			Ib:           uint16(time.Now().Unix()) % 20,
+			Ic:           uint16(time.Now().Unix()) % 20,
+		}
+	}
+	// for test
 	c.Send(upload_meter.Serialize())
-	c.Charging_Pile.MeterReading += 1
+	c.Charging_Pile.MeterReading += METER_READING_STEP
 }
 
 func (c *Conn) ProccessChargingPileStopChargingStatus() {
@@ -213,5 +234,5 @@ func (c *Conn) ProccessChargingPileStopChargingStatus() {
 		Tid: c.ID,
 	}
 	c.Send(stop_charging.Serialize())
-	c.Charging_Pile.MeterReading = 0
+	c.Charging_Pile.MeterReading += METER_READING_STEP
 }
